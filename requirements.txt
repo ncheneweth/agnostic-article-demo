@@ -1,0 +1,4 @@
+watchdog
+openai
+pyyaml
+pypdf

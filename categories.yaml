@@ -1,0 +1,11 @@
+---
+categories:
+  receipts:
+    subject: invoices or receipts for purchased items except real estate.
+  real estate:
+    subject: |
+      documents related to the purchase or sale of real estate. examples include sale contracts, deeds of trust,
+      closing statements and any other document type commony included in a real estate escrow transaction.
+  tax returns:
+    subject: united states federal or state personal or entity tax returns. These documents will have the words Tax Return contained within.
+  
