@@ -25,6 +25,8 @@ LLM_MAX_TOKENS = 80
 MAX_INPUT_CHARS = 8_000
 MAX_PDF_PAGES = 10
 
+prompt_intro = ""
+
 llm_client = OpenAI(
     base_url=LLM_BASE_URL,
     api_key="not-needed"
@@ -98,12 +100,13 @@ def build_classification_prompt(filename: str, contents: str, categories: Dict[s
 
     The LLM is expected to respond with the name of the single best folder to classify the document into.
     """
+
     category_block = "\n".join(
         f"- {name}: {desc}"
         for name, desc in categories.items()
     )
 
-    return f"""
+    prompt_intro = f"""
 You are classifying a document into ONE folder.
 
 Choose the single best folder name from the list below of folder names and descriptions of the kind of content that should go into the folder.
@@ -119,6 +122,11 @@ Rules:
 - If uncertain, choose the closest match
 
 Filename: {filename}
+
+    """
+    print(prompt_intro) # outputs the prompt so you can see what is being sent to the model
+    return f"""
+{prompt_intro}
 
 Document contents:
 {contents}
@@ -164,6 +172,7 @@ class FileCreatedHandler(FileSystemEventHandler):
         Sebounce the event to prevent over-classification due to multiple file writes.
         Also skip directories and files without extractable text.
         """
+
         if event.is_directory:
             return
 
@@ -186,8 +195,6 @@ class FileCreatedHandler(FileSystemEventHandler):
             folder = FALLBACK_CATEGORY
         else:
             try:
-                # outputs the prompt so you can see what is being sent to the model
-                print(build_classification_prompt(src_path.name, contents, self.categories))
                 folder = classify_document(src_path.name, contents, self.categories)
             except Exception as e:
                 print(f"[ERROR] Classification failed: {e}")
@@ -197,7 +204,7 @@ class FileCreatedHandler(FileSystemEventHandler):
             print(f"[WARN] Invalid category '{folder}', using '{FALLBACK_CATEGORY}'")
             folder = FALLBACK_CATEGORY
 
-        print(folder)
+        print(f"File categorized as: {folder}")
 
 def main(watch_folder: Path, config_file: Path):
     """
